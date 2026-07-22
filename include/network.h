@@ -1,59 +1,47 @@
-#pragma once
-#include "matrix.h"
-#include <vector>
-#include <string>
-#include <random>
+#ifndef NETWORK_H
+#define NETWORK_H
 
-// ============================
-//      全连接层 (DenseLayer)
-// ============================
-struct DenseLayer {
-    size_t in_features;
-    size_t out_features;
+#include "matrix.h"
+#include <string>
+#include <vector>
+#include <cmath>
+
+struct Layer {
+    Matrix W, b;           // 权重和偏置
+    Matrix dW, db;         // 梯度
+    Matrix input;          // 前向传播缓存
     std::string activation;
 
-    // 【关键】这里明确声明为 W 和 b
-    Matrix W;  
-    Matrix b;  
-
-    // 缓存，用于反向传播
-    Matrix input_cache;
-    Matrix z_cache; // 线性变换结果 (Wx + b)
-
-    DenseLayer() : in_features(0), out_features(0) {}
-    DenseLayer(size_t in_f, size_t out_f, const std::string& act)
-        : in_features(in_f), out_features(out_f), activation(act),
-          W(out_f, in_f), b(1, out_f) {}
-
-    void init_weights(std::mt19937& rng);
-    Matrix forward(const Matrix& input);
-    Matrix backward(const Matrix& grad_output, double lr, double batch_size);
+    // Adam 优化器状态
+    Matrix mW, vW;         // W 的一阶和二阶动量
+    Matrix mb, vb;         // b 的一阶和二阶动量
+    int t = 0;             // 时间步
 };
 
-// ============================
-//       神经网络类 (Network)
-// ============================
 class Network {
 public:
-    Network();
+    std::vector<Layer> layers;
 
-    void add_layer(size_t input_size, size_t output_size,
-                   const std::string& activation = "relu");
-    void init(unsigned seed = 42);
+    void add_layer(size_t in_dim, size_t out_dim, const std::string& activation);
+    void init(int seed = 42);
 
-    Matrix forward(const Matrix& input);
-    double train_batch(const Matrix& X, const Matrix& Y, double learning_rate);
-    
-    // 单样本预测接口
-    double predict(double dividend, double divisor, double quotient_norm);
+    Matrix forward(const Matrix& X);
+    double train_batch(const Matrix& X, const Matrix& Y, double lr);
+    double predict(const std::vector<double>& features);
 
-    size_t num_layers() const { return layers_.size(); }
+    size_t num_layers() const { return layers.size(); }
 
-    // 保存和加载权重
-    void save_weights(const std::string& filepath) const;
-    void load_weights(const std::string& filepath);
+    void save_weights(const std::string& filename) const;
+    void load_weights(const std::string& filename);
 
 private:
-    std::vector<DenseLayer> layers_;
-    std::mt19937 rng_;
+    Matrix activate(const Matrix& X, const std::string& type);
+    Matrix activate_deriv(const Matrix& activated, const std::string& type);
+    
+    // Adam 参数
+    double beta1 = 0.9;
+    double beta2 = 0.999;
+    double epsilon = 1e-8;
 };
+
+#endif
