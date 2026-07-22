@@ -1,0 +1,24 @@
+# 构建目录
+build/
+
+# 数据文件
+data/*.csv
+
+# 编译产物
+*.o
+*.obj
+*.exe
+*.out
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 权重文件
+model_weights.txt
+
+# 系统文件
+.DS_Store
+Thumbs.db
