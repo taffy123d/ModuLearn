@@ -36,7 +36,17 @@ int main() {
     std::cout << "  取模运算神经网络 - 独立预测工具\n";
     std::cout << "========================================\n\n";
 
+    // ✅ 先搭建和训练时完全一样的网络结构
     Network net;
+    std::vector<size_t> hidden_layers = {256, 256, 128, 64};
+    size_t input_dim = 12;
+
+    net.add_layer(input_dim, hidden_layers[0], "leaky_relu");
+    for (size_t i = 0; i + 1 < hidden_layers.size(); ++i)
+        net.add_layer(hidden_layers[i], hidden_layers[i + 1], "leaky_relu");
+    net.add_layer(hidden_layers.back(), 1, "sigmoid");
+
+    // ✅ 然后再加载权重
     try {
         net.load_weights("model_weights.txt");
         std::cout << "[✓] 成功加载模型权重\n\n";

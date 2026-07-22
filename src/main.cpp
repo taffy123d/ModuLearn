@@ -17,7 +17,7 @@ struct Config {
     std::string test_input   = "data/test_input.csv";
     std::string test_output  = "data/test_output.csv";
 
-    int    epochs          = 25;
+    int    epochs          = 15;
     int    batch_size      = 128;      // 更大 batch 减少震荡
     double learning_rate   = 0.001;    // Adam 用 0.001 更安全
     double lr_decay        = 0.999;
